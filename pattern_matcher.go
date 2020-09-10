@@ -49,7 +49,6 @@ func NewPatternMatcher(patterns []string) (*PatternMatcher, error) {
 			return nil, err
 		}
 		newp.cleanedPattern = p
-		newp.dirs = strings.Split(p, string(os.PathSeparator))
 		pm.patterns = append(pm.patterns, newp)
 	}
 	return pm, nil
@@ -60,8 +59,6 @@ func NewPatternMatcher(patterns []string) (*PatternMatcher, error) {
 func (pm *PatternMatcher) Matches(file string) (bool, error) {
 	matched := false
 	file = filepath.FromSlash(file)
-	parentPath := filepath.Dir(file)
-	parentPathDirs := strings.Split(parentPath, string(os.PathSeparator))
 
 	for _, pattern := range pm.patterns {
 		negative := false
@@ -73,13 +70,6 @@ func (pm *PatternMatcher) Matches(file string) (bool, error) {
 		match, err := pattern.match(file)
 		if err != nil {
 			return false, err
-		}
-
-		if !match && parentPath != "." {
-			// Check to see if the pattern matches one of our parent dirs.
-			if len(pattern.dirs) <= len(parentPathDirs) {
-				match, _ = pattern.match(strings.Join(parentPathDirs[:len(pattern.dirs)], string(os.PathSeparator)))
-			}
 		}
 
 		if match {
@@ -107,7 +97,6 @@ func (pm *PatternMatcher) Patterns() []*Pattern {
 // Pattern defines a single regexp used to filter file paths.
 type Pattern struct {
 	cleanedPattern string
-	dirs           []string
 	regexp         *regexp.Regexp
 	exclusion      bool
 }
@@ -200,6 +189,9 @@ func (p *Pattern) compile() error {
 			regStr += string(ch)
 		}
 	}
+
+	// Matches all descendants of a directory match
+	regStr += "(" + escSL + ".*)?"
 
 	regStr += "$"
 
