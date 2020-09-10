@@ -1,5 +1,8 @@
 # dockerignore
 
+[![Build Status](https://circleci.com/gh/tilt-dev/dockerignore/tree/master.svg?style=shield)](https://circleci.com/gh/tilt-dev/dockerignore)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/tilt-dev/dockerignore)](https://pkg.go.dev/github.com/tilt-dev/dockerignore)
+
 A fork of Docker's package for reading and interpreting .dockerignore files
 
 ## Why
