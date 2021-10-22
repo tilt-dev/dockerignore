@@ -128,6 +128,8 @@ func TestMatches(t *testing.T) {
 		{"dir/**", "dir/file/", true},
 		{"dir/**", "dir/dir2/file", true},
 		{"dir/**", "dir/dir2/file/", true},
+		{"**/dir", "dir", true},
+		{"**/dir", "dir/file", true},
 		{"**/dir2/*", "dir/dir2/file", true},
 		{"**/dir2/*", "dir/dir2/file/", true},
 		{"**/dir2/**", "dir/dir2/dir3/file", true},
@@ -170,7 +172,12 @@ func TestMatches(t *testing.T) {
 		{"abc.def", "abcZdef", false},
 		{"abc?def", "abcZdef", true},
 		{"abc?def", "abcdef", false},
-		{"a\\\\", "a\\", true},
+		// test case broken on Go 1.16+ - this was _never_ a valid pattern but matcher logic
+		// used to exit early if there wasn't a match and now continues to validate the pattern
+		// since filepath::Match() is only used to validate the pattern and run against `.`, it
+		// never actually matches and the short-circuit used to hide this
+		// see https://cs.opensource.google/go/go/+/b5ddc42b465dd5b9532ee336d98343d81a6d35b2
+		// {"a\\\\", "a\\", true},
 		{"**/foo/bar", "foo/bar", true},
 		{"**/foo/bar", "dir/foo/bar", true},
 		{"**/foo/bar", "dir/dir2/foo/bar", true},
@@ -179,13 +186,14 @@ func TestMatches(t *testing.T) {
 		{"abc/**", "abc/def/ghi", true},
 		{"**/.foo", ".foo", true},
 		{"**/.foo", "bar.foo", false},
+		{"a(b)c/def", "a(b)c/def", true},
+		{"a(b)c/def", "a(b)c/xyz", false},
+		{"a.+()|{}$bc", "a.+()|{}$bc", true},
 	}
 
 	if runtime.GOOS != "windows" {
 		tests = append(tests, []matchesTestCase{
 			{"a\\*b", "a*b", true},
-			{"a\\", "a", false},
-			{"a\\", "a\\", false},
 		}...)
 	}
 
