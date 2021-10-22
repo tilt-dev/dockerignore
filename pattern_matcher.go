@@ -8,8 +8,6 @@ import (
 	"strings"
 	"text/scanner"
 	"unicode/utf8"
-
-	"github.com/sirupsen/logrus"
 )
 
 // escapeBytes is a bitmap used to check whether a character should be escaped when creating the regex.
@@ -97,10 +95,6 @@ func (pm *PatternMatcher) Matches(file string) (bool, error) {
 		if match {
 			matched = !negative
 		}
-	}
-
-	if matched {
-		logrus.Debugf("Skipping excluded path: %s", file)
 	}
 
 	return matched, nil
