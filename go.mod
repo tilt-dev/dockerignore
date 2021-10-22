@@ -1,6 +1,6 @@
 module github.com/tilt-dev/dockerignore
 
-go 1.14
+go 1.16
 
 require (
 	github.com/sirupsen/logrus v1.6.0
